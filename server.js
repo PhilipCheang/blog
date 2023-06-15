@@ -40,7 +40,7 @@ const Post = mongoose.model("Post", postSchema);
 
 app.get("/", async function (req, res) {
   try {
-    const posts = await Post.find({});
+    const posts = await Post.find({}).sort({ date: -1 });
     res.render("home", {
       startingContent: homeStartingContent,
       posts: posts,
@@ -68,6 +68,9 @@ app.post("/compose", function (req, res) {
     })
     .catch((err) => {
       console.log(err);
+      res
+        .status(500)
+        .send("An error occurred while saving the post: " + err.message);
     });
 });
 
