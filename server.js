@@ -32,7 +32,6 @@ const postSchema = {
   content: String,
   date: {
     type: Date,
-    default: Date.now,
   },
 };
 
@@ -59,6 +58,7 @@ app.post("/compose", function (req, res) {
   const post = new Post({
     title: req.body.postTitle,
     content: req.body.postBody,
+    date: new Date(),
   });
 
   post
@@ -78,10 +78,20 @@ app.get("/posts/:postId", async function (req, res) {
   const requestedPostId = req.params.postId;
   try {
     const post = await Post.findOne({ _id: requestedPostId });
+    if (!post) {
+      // No post found with the given ID
+      return res.status(404).send("Post not found");
+    }
+
+    const formattedDate = post.date
+      ? post.date.toLocaleString("en-US", {
+          timeZone: "America/Chicago",
+        })
+      : ""; // Set a default value for formattedDate if post.date is undefined
     res.render("post", {
       title: post.title,
       content: post.content,
-      date: post.date, // Add the date field
+      date: formattedDate, // Add the date field
     });
   } catch (err) {
     console.error(err);
